@@ -1,0 +1,60 @@
+################################################################################
+# Information related with EPC data.
+#
+################################################################################
+
+# Data location
+epc_path: "data/input/all-domestic-certificates.zip"
+
+# Variable Selection
+epc_headers:
+  - 'POSTCODE'
+  - 'PROPERTY_TYPE'
+  - 'BUILT_FORM'        
+  - 'CONSTRUCTION_AGE_BAND'
+  - 'TENURE'    
+  - 'TOTAL_FLOOR_AREA'
+  - 'MAINS_GAS_FLAG'
+  - 'BUILDING_REFERENCE_NUMBER'
+  - 'LODGEMENT_DATETIME'
+
+
+
+################################################################################
+# Information related with SPENSER data.
+#
+################################################################################
+
+# Data Location
+spenser_path: "data/input/msm_england.zip"
+
+# Unused variables
+drop_list:
+  - "QS420_CELL"
+  - "CommunalSize"
+  - "LC4408EW_C_PPBROOMHEW11"
+  - "HRPID"
+  - "FILLED"
+
+
+
+
+################################################################################
+# Information to configure the EnrichingPopulation class.
+#
+################################################################################
+
+# Number of neighbors used in the Matching Process
+n_neighbors: 200
+
+# Columns used to calculate the Propensity Score value
+overlap_columns:
+  - "LC4402_C_TYPACCOM"
+  - "tenure"
+  - "Area_factor"
+
+# Variables used to enrich the synthetic population
+matches_columns:
+  - "FLOOR_AREA"
+  - "GAS"
+  - "ACCOM_AGE"
