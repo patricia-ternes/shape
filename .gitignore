@@ -9,3 +9,7 @@ __pycache__
 *all-domestic-certificates.zip
 *epc_england.zip
 *msm_england.zip
+
+# build
+build
+_build
