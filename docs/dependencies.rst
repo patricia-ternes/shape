@@ -1,0 +1,19 @@
+
+
+Dependencies
+============
+
+Required
+--------
+
+- matplotlib=3.5.1
+- numpy=1.21.2
+- pandas=1.4.1
+- python=3.9.7
+- pip=21.2.4
+- pyyaml=6.0
+- scikit-learn=1.0.2
+- seaborn=0.11.2
+- setuptools=58.0.4
+- causalinference==0.1.3
+
