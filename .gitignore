@@ -1,0 +1,11 @@
+# local configuration
+.vscode/*
+
+# python cache
+*.ipynb_checkpoints
+__pycache__
+
+# data
+*all-domestic-certificates.zip
+*epc_england.zip
+*msm_england.zip
