@@ -1,4 +1,4 @@
-name: shape
+name: shape-env
 channels:
   - conda-forge
   - defaults

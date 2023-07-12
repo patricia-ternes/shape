@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="shape-population",
+    name="shape",
     version="0.1.0",
     author="Patricia Ternes",
     author_email="p.ternesdallagnollo@leeds.ac.uk",

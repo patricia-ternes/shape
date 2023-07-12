@@ -27,8 +27,8 @@ To start working with this repository you need to clone it onto your local
 machine:
 
 ```bash
-$ git clone https://github.com/patricia-ternes/shape.git
-$ cd shape
+$ git clone https://github.com/patricia-ternes/shape-population.git
+$ cd shape-population
 ```
 
 ### Requirements
@@ -54,7 +54,7 @@ environment file:
 
 ```bash
 $ conda env create -f environment.yml
-$ conda activate shape
+$ conda activate shape-env
 ```
 
 ## Installation & Usage
@@ -68,15 +68,20 @@ $ python setup.py install
 To run the model type:
 
 ```bash
-$ python shape-population
+$ python shape
 ```
 
 The above command will run the package as defined in the
-[main file](shape/__main__.py). If you want to create a personalised script, you
-can import the modules as follows:
+[main file](shape/__main__.py).
+*Important: the above will just work inside the `shape-population` project*
+*directory.*
+
+If you want to create a personalised script, you can import the modules as
+follows:
 
 ```python
-from shape import Epc, Spenser, geo_lookup, EnrichingPopulation
+from shape.data_preparation import Epc, Spenser, geo_lookup
+from shape.enriching_population import EnrichingPopulation
 ```
 
 ## Required Datasets
