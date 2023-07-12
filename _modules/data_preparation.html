@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>data_preparation &mdash; SHAPE 0.1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SHAPE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dependencies.html">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">SHAPE API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SHAPE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">data_preparation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for data_preparation</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">SHAPE: data wrangling</span>
+<span class="sd">Created on Thursday August 25 2022</span>
+<span class="sd">@author: patricia-ternes</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+
+
+<div class="viewcode-block" id="geo_lookup"><a class="viewcode-back" href="../data_prep.html#data_preparation.geo_lookup">[docs]</a><span class="k">def</span> <span class="nf">geo_lookup</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return geographic lookup dicts and local authority list.</span>
+
+<span class="sd">    Three lookup dictionaries are generated:</span>
+<span class="sd">    - From Postcodes to Output Areas (oacd_lookup).</span>
+<span class="sd">    - From Output Areas to Local Authority names (ladnm_lookup).</span>
+<span class="sd">    - From Output Areas to Local Authority codes (ladcd_lookup).</span>
+
+<span class="sd">    :return: local authority list, oacd_lookup, ladnm_lookup, ladcd_lookup</span>
+<span class="sd">    :rtype: list, dict, dict, dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Configure lookups from &quot;config/lookups.yaml&quot; file</span>
+    <span class="n">lookup_yaml</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;config/lookups.yaml&quot;</span><span class="p">)</span>
+    <span class="n">parsed_lookup</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">lookup_yaml</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+    <span class="n">lookup_path</span> <span class="o">=</span> <span class="n">parsed_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;area_path&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Open file as Pandas DataFrame</span>
+    <span class="n">area_lookup</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+        <span class="n">lookup_path</span><span class="p">,</span>
+        <span class="n">compression</span><span class="o">=</span><span class="s2">&quot;zip&quot;</span><span class="p">,</span>
+        <span class="n">usecols</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;ladnm&quot;</span><span class="p">,</span> <span class="s2">&quot;ladcd&quot;</span><span class="p">,</span> <span class="s2">&quot;oa11cd&quot;</span><span class="p">,</span> <span class="s2">&quot;pcds&quot;</span><span class="p">],</span>
+        <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;unicode_escape&quot;</span><span class="p">,</span>
+        <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;python&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Clean empty and non-England areas</span>
+    <span class="n">area_lookup</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;ladcd&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">discard</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;L&quot;</span><span class="p">,</span> <span class="s2">&quot;M&quot;</span><span class="p">]</span>
+    <span class="n">area_lookup</span> <span class="o">=</span> <span class="n">area_lookup</span><span class="p">[</span><span class="o">~</span><span class="n">area_lookup</span><span class="o">.</span><span class="n">ladcd</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">discard</span><span class="p">))]</span>
+    <span class="n">lads</span> <span class="o">=</span> <span class="n">area_lookup</span><span class="o">.</span><span class="n">ladcd</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+
+    <span class="c1"># Make lookup dictionaries</span>
+    <span class="n">oacd_lookup</span> <span class="o">=</span> <span class="n">area_lookup</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;pcds&quot;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;oa11cd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="n">ladnm_lookup</span> <span class="o">=</span> <span class="n">area_lookup</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;oa11cd&quot;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;ladnm&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="n">ladcd_lookup</span> <span class="o">=</span> <span class="n">area_lookup</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;oa11cd&quot;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;ladcd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">lads</span><span class="p">,</span> <span class="n">ladnm_lookup</span><span class="p">,</span> <span class="n">ladcd_lookup</span><span class="p">,</span> <span class="n">oacd_lookup</span></div>
+
+
+<div class="viewcode-block" id="augment"><a class="viewcode-back" href="../data_prep.html#data_preparation.augment">[docs]</a><span class="k">def</span> <span class="nf">augment</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">lookup</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple dictionary translate function to use with lambda function.</span>
+
+<span class="sd">    Return a value for a given key.</span>
+<span class="sd">    If the key is not listed in the dictionary, the function will return `None`.</span>
+
+<span class="sd">    :param x: dictionary key</span>
+<span class="sd">    :type x: Any</span>
+<span class="sd">    :param lookup: dictionary</span>
+<span class="sd">    :type lookup: dict</span>
+<span class="sd">    :return: dictionary value</span>
+<span class="sd">    :rtype: Any or empty</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This looks redundant, but ensures that the function works even for</span>
+    <span class="c1"># missing values (returning empty code).</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">lookup</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="Epc"><a class="viewcode-back" href="../data_prep.html#data_preparation.Epc">[docs]</a><span class="k">class</span> <span class="nc">Epc</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to represent the EPC data and related parameters/methods.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oacd_lookup</span><span class="p">,</span> <span class="n">ladnm_lookup</span><span class="p">,</span> <span class="n">ladcd_lookup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise an EPC class.&quot;&quot;&quot;</span>
+
+        <span class="c1"># Configure epc api related parameters from &quot;config/config.yaml&quot;</span>
+        <span class="n">epc_yaml</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;config/config.yaml&quot;</span><span class="p">)</span>
+        <span class="n">parsed_epc</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">epc_yaml</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">parsed_epc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;epc_path&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_headers</span> <span class="o">=</span> <span class="n">parsed_epc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;epc_headers&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Configure lookups</span>
+        <span class="c1">## Lookups from &quot;config/lookups.yaml&quot; file</span>
+        <span class="n">lookup_yaml</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;config/lookups.yaml&quot;</span><span class="p">)</span>
+        <span class="n">parsed_lookup</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">lookup_yaml</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accommodation_lookup</span> <span class="o">=</span> <span class="n">parsed_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;accommodation&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">age_categorical_lookup</span> <span class="o">=</span> <span class="n">parsed_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;age_categorical&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">age_numerical_lookup</span> <span class="o">=</span> <span class="n">parsed_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;age_numerical&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">floor_area_lookup</span> <span class="o">=</span> <span class="n">parsed_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;floor_area&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gas_lookup</span> <span class="o">=</span> <span class="n">parsed_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gas&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tenure_lookup</span> <span class="o">=</span> <span class="n">parsed_lookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tenure&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Get EPC data as DataFrame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_epc_dataframe</span><span class="p">()</span>
+
+        <span class="c1"># Set LADNM, LADCD and OA columns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_geo_lookups</span><span class="p">(</span><span class="n">oacd_lookup</span><span class="p">,</span> <span class="n">ladnm_lookup</span><span class="p">,</span> <span class="n">ladcd_lookup</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Epc.get_epc_dataframe"><a class="viewcode-back" href="../data_prep.html#data_preparation.Epc.get_epc_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">get_epc_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get EPC data for all available England Local Authorities.</span>
+
+<span class="sd">        Note 1: You need a valid EPC zipped dataset.</span>
+
+<span class="sd">        Note 2: The code was organized for the following .zip tree:</span>
+<span class="sd">        ```</span>
+<span class="sd">        all-domestic-certificates.zip</span>
+<span class="sd">        |__ LICENCE.txt</span>
+<span class="sd">        |__ domestic-XYYYYYYYY-LADname</span>
+<span class="sd">        |   |__ recommendations.csv</span>
+<span class="sd">        |   |__ certificates.csv</span>
+<span class="sd">        |__ domestic-XYYYYYYYY-LADname</span>
+<span class="sd">        |    |__ recommendations.csv</span>
+<span class="sd">        |    |__ certificates.csv</span>
+<span class="sd">        .</span>
+<span class="sd">        .</span>
+<span class="sd">        .</span>
+<span class="sd">        ```</span>
+<span class="sd">        :return: A data frame with all England EPC collected data.</span>
+<span class="sd">        :rtype: pandas.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">epc_zip_file</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>  <span class="c1"># .zip file location</span>
+
+        <span class="c1"># Get the name/path of all available `certificate` files</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">text_file</span><span class="o">.</span><span class="n">filename</span>
+            <span class="k">for</span> <span class="n">text_file</span> <span class="ow">in</span> <span class="n">epc_zip_file</span><span class="o">.</span><span class="n">infolist</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">text_file</span><span class="o">.</span><span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;certificates.csv&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Keep just England file names, i.e. LAD codes that start with &quot;E&quot;</span>
+        <span class="c1">## Also include unknown local authority certificates, i.e.  LAD codes that start with &quot;_&quot;</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">folder</span>
+            <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">files</span>
+            <span class="k">if</span> <span class="n">folder</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;E&quot;</span> <span class="ow">or</span> <span class="n">folder</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Create a dataframe for every England certificate file</span>
+        <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                <span class="n">epc_zip_file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">),</span> <span class="n">usecols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_headers</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Return a unique EPC dataframe</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Epc.set_geo_lookups"><a class="viewcode-back" href="../data_prep.html#data_preparation.Epc.set_geo_lookups">[docs]</a>    <span class="k">def</span> <span class="nf">set_geo_lookups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oacd_lookup</span><span class="p">,</span> <span class="n">ladnm_lookup</span><span class="p">,</span> <span class="n">ladcd_lookup</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add geographic information using postcode.</span>
+
+<span class="sd">        1. Transform the postcode column into Output Area (new column name: &quot;OA&quot;)</span>
+<span class="sd">        2. Create a new column &quot;LADNM&quot; with the Local Authority name</span>
+<span class="sd">        3. Create a new column &quot;LADCD&quot; with the Local Authority code</span>
+
+<span class="sd">        :param oacd_lookup: lookup from postcode to Output Area</span>
+<span class="sd">        :type oacd_lookup: dict</span>
+<span class="sd">        :param ladnm_lookup: lookup from  Output Area to Local Authority name</span>
+<span class="sd">        :type ladnm_lookup: dict</span>
+<span class="sd">        :param ladcd_lookup: lookup from  Output Area to Local Authority code</span>
+<span class="sd">        :type ladcd_lookup: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Area: change area from postcode to output area</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_categorical_code</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;POSTCODE&quot;</span><span class="p">,</span> <span class="n">oacd_lookup</span><span class="p">,</span> <span class="n">rename</span><span class="o">=</span><span class="s2">&quot;OA&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create new column: Local authority name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;LADNM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;OA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">augment</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ladnm_lookup</span><span class="p">))</span>
+
+        <span class="c1"># Create new column: Local authority code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;LADCD&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;OA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">augment</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ladcd_lookup</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Epc.remove_duplicates"><a class="viewcode-back" href="../data_prep.html#data_preparation.Epc.remove_duplicates">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">remove_duplicates</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove EPC Duplicate Certificates</span>
+
+<span class="sd">        When using the EPC datasets we need to be careful with duplicate EPCs</span>
+<span class="sd">        for the same property. While not an enormous issue as an EPC is valid</span>
+<span class="sd">        for up to 10 years unless the property is renovated or retrofitted,</span>
+<span class="sd">        there may be multiple records especially for rental properties which are</span>
+<span class="sd">        improved to meet recent regulations.</span>
+
+<span class="sd">        This function removing duplicates with the same BUILDING REFERENCE</span>
+<span class="sd">        NUMBER by selecting the most recent record and discarding others.</span>
+
+<span class="sd">        :param df: Raw EPC dataset.</span>
+<span class="sd">        :type df: pandas.DataFrame</span>
+<span class="sd">        :return: EPC dataset without duplicate Certificates.</span>
+<span class="sd">        :rtype: pandas.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;LODGEMENT_DATETIME&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;LODGEMENT_DATETIME&quot;</span><span class="p">])</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;BUILDING_REFERENCE_NUMBER&quot;</span><span class="p">,</span> <span class="s2">&quot;LODGEMENT_DATETIME&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span>
+            <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;BUILDING_REFERENCE_NUMBER&quot;</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s2">&quot;last&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">drop_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;BUILDING_REFERENCE_NUMBER&quot;</span><span class="p">,</span> <span class="s2">&quot;LODGEMENT_DATETIME&quot;</span><span class="p">]</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="Epc.set_categorical_code"><a class="viewcode-back" href="../data_prep.html#data_preparation.Epc.set_categorical_code">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">set_categorical_code</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">df_col</span><span class="p">,</span> <span class="n">lookup</span><span class="p">,</span> <span class="n">rename</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the lookup to a categorical column.</span>
+
+<span class="sd">        Transform the values in a dataframe column using a lookup dictionary.</span>
+<span class="sd">        This method is valid when the column values are categorical.</span>
+
+<span class="sd">        :param df:  The input dataframe.</span>
+<span class="sd">        :type df: pandas.DataFrame</span>
+<span class="sd">        :param df_col: The column in df that represents the categorical values.</span>
+<span class="sd">        :type df_col: string</span>
+<span class="sd">        :param lookup: A dictionary from categorical values to categorical codes.</span>
+<span class="sd">        :type lookup: dict</span>
+<span class="sd">        :param rename: The new column name after transformation (if false, keep</span>
+<span class="sd">            the current name), defaults to False.</span>
+<span class="sd">        :type rename: bool, optional</span>
+<span class="sd">        :return: Returns the data with the updated column.</span>
+<span class="sd">        :rtype: pandas.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># setting new values according the rename_dict</span>
+        <span class="n">df</span><span class="p">[</span><span class="n">df_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df_col</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">augment</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">lookup</span><span class="p">))</span>
+
+        <span class="c1"># remove empty rows</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="n">df_col</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># rename column</span>
+        <span class="k">if</span> <span class="n">rename</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="n">df_col</span><span class="p">:</span> <span class="n">rename</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Epc.set_numerical_code"><a class="viewcode-back" href="../data_prep.html#data_preparation.Epc.set_numerical_code">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">set_numerical_code</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">df_col</span><span class="p">,</span> <span class="n">lookup</span><span class="p">,</span> <span class="n">rename</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the lookup to a numerical column</span>
+
+<span class="sd">        Transform the values in a dataframe column using a lookup dictionary.</span>
+<span class="sd">        This method is valid when the column values are numerical, following</span>
+<span class="sd">        the rule:</span>
+
+<span class="sd">        if (j &lt; value &lt;= k), then, (value = i).</span>
+
+<span class="sd">        :param df: The input dataframe.</span>
+<span class="sd">        :type df: pandas.DataFrame</span>
+<span class="sd">        :param df_col: The column in df that represents the numerical values.</span>
+<span class="sd">        :type df_col: string</span>
+<span class="sd">        :param lookup: A dictionary from numerical values to numerical codes;</span>
+<span class="sd">            The dictionary structure is [[i1, j1, k1], [i2, j2, k2], ...,</span>
+<span class="sd">            [iN, jN, kN]], where: iN is the desired code for band N, jN is the</span>
+<span class="sd">            minimum value of the band N (not included), kN is the maximum value</span>
+<span class="sd">            of the band N (included), and N is the number of bands.</span>
+<span class="sd">        :type lookup: dict</span>
+<span class="sd">        :param rename: The new column name after transformation (if false, keep</span>
+<span class="sd">            the current name), defaults to False.</span>
+<span class="sd">        :type rename: bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">band</span> <span class="ow">in</span> <span class="n">lookup</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="n">df_col</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">band</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df_col</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">band</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="n">df_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">band</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># remove out bound and empty rows</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="n">df_col</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">rename</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="n">df_col</span><span class="p">:</span> <span class="n">rename</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Epc.set_lookups"><a class="viewcode-back" href="../data_prep.html#data_preparation.Epc.set_lookups">[docs]</a>    <span class="k">def</span> <span class="nf">set_lookups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update columns using the lookups dictionaries.</span>
+
+<span class="sd">        Update the information related with `area`, `tenure`, `accommodation</span>
+<span class="sd">        type`, `construction age band`, `main gas flag`, and `floor area`,</span>
+<span class="sd">        by using the lookup variables (`accommodation_lookup`,</span>
+<span class="sd">        `age_categorical_lookup`, `age_numerical_lookup`, `floor_area_lookup`,</span>
+<span class="sd">        `gas_lookup`, `tenure_lookup`, `area_lookup`) and the</span>
+<span class="sd">        `set_categorical_code` and `set_numerical_code` functions.</span>
+
+<span class="sd">        :param df: Dataframe with EPC information.</span>
+<span class="sd">        :type df: pandas.Dataframe</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Tenure: change the tenure from EPC to SPENSER classification</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_categorical_code</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;TENURE&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tenure_lookup</span><span class="p">,</span> <span class="n">rename</span><span class="o">=</span><span class="s2">&quot;tenure&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Accommodation type:</span>
+        <span class="c1"># - create an EPC accommodation type by combining &quot;PROPERTY_TYPE&quot; and &quot;BUILT_FORM&quot;</span>
+        <span class="c1"># - change the accommodation type from EPC to SPENSER classification</span>
+        <span class="c1"># - discard &quot;PROPERTY_TYPE&quot; and &quot;BUILT_FORM&quot; columns</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;LC4402_C_TYPACCOM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;PROPERTY_TYPE&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;BUILT_FORM&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_categorical_code</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;LC4402_C_TYPACCOM&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">accommodation_lookup</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;PROPERTY_TYPE&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;BUILT_FORM&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Construction age band:</span>
+        <span class="c1"># - initially is a combination of categorical and numeric values</span>
+        <span class="c1"># - convert all categorical values into absolute ages</span>
+        <span class="c1"># - groups the absolute build age into bands</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_categorical_code</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span>
+            <span class="s2">&quot;CONSTRUCTION_AGE_BAND&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">age_categorical_lookup</span><span class="p">,</span>
+            <span class="n">rename</span><span class="o">=</span><span class="s2">&quot;ACCOM_AGE&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;ACCOM_AGE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;ACCOM_AGE&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_numerical_code</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;ACCOM_AGE&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">age_numerical_lookup</span><span class="p">)</span>
+
+        <span class="c1"># Main gas flag: change the values (N, Y) to numerical codes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_categorical_code</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;MAINS_GAS_FLAG&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas_lookup</span><span class="p">,</span> <span class="n">rename</span><span class="o">=</span><span class="s2">&quot;GAS&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Floor Area: groups the absolute area into bands</span>
+        <span class="n">area_max_lim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">floor_area_lookup</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s2">&quot;TOTAL_FLOOR_AREA&quot;</span><span class="p">:</span> <span class="s2">&quot;FLOOR_AREA&quot;</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">FLOOR_AREA</span> <span class="o">&gt;</span> <span class="n">area_max_lim</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_numerical_code</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;FLOOR_AREA&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">floor_area_lookup</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Epc.step"><a class="viewcode-back" href="../data_prep.html#data_preparation.Epc.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;EPC data preparation main step.</span>
+
+<span class="sd">        This function return a processed EPC dataset by:</span>
+
+<span class="sd">        1. Removing EPC Duplicate Certificates</span>
+<span class="sd">        2. Performing variables re-categorisation</span>
+
+<span class="sd">        :param df: EPC DataFrame per Local Authority</span>
+<span class="sd">        :type df: pandas.DataFrame</span>
+<span class="sd">        :return: processed EPC data</span>
+<span class="sd">        :rtype: pandas.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_duplicates</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="c1"># Apply all lookups</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_lookups</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="c1"># Change selected columns to integer values</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;FLOOR_AREA&quot;</span><span class="p">,</span> <span class="s2">&quot;ACCOM_AGE&quot;</span><span class="p">,</span> <span class="s2">&quot;GAS&quot;</span><span class="p">,</span> <span class="s2">&quot;tenure&quot;</span><span class="p">,</span> <span class="s2">&quot;LC4402_C_TYPACCOM&quot;</span><span class="p">]</span>
+        <span class="n">df</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span></div></div>
+
+
+<div class="viewcode-block" id="Spenser"><a class="viewcode-back" href="../data_prep.html#data_preparation.Spenser">[docs]</a><span class="k">class</span> <span class="nc">Spenser</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to represent the SPENSER data and related parameters/methods.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ladnm_lookup</span><span class="p">,</span> <span class="n">ladcd_lookup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise a Spenser class.&quot;&quot;&quot;</span>
+        <span class="c1"># Configure SPENSER related parameters from &quot;config/config.yaml&quot;</span>
+        <span class="n">spenser_yaml</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;config/config.yaml&quot;</span><span class="p">)</span>
+        <span class="n">parsed_spenser</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">spenser_yaml</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">parsed_spenser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;spenser_path&quot;</span><span class="p">)</span>
+        <span class="n">drop_list</span> <span class="o">=</span> <span class="n">parsed_spenser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;drop_list&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create SPENSER dataframe</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_spenser_dataframe</span><span class="p">()</span>
+
+        <span class="c1"># Set Local Autority code and name columns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_geo_lookups</span><span class="p">(</span><span class="n">ladnm_lookup</span><span class="p">,</span> <span class="n">ladcd_lookup</span><span class="p">)</span>
+
+        <span class="c1"># Drop unnecessary columns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Sort Columns: aesthetic purpose only</span>
+        <span class="n">column_sort</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;HID&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LADNM&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LADCD&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;OA&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4402_C_TYPACCOM&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4402_C_TENHUK11&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4408_C_AHTHUK11&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4404_C_SIZHUK11&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4404_C_ROOMS&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4405EW_C_BEDROOMS&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4402_C_CENHEATHUK11&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4605_C_NSSEC&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4202_C_ETHHUK11&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4202_C_CARSNO&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">column_sort</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Spenser.get_spenser_dataframe"><a class="viewcode-back" href="../data_prep.html#data_preparation.Spenser.get_spenser_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">get_spenser_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get EPC data for all available local authorities.</span>
+
+<span class="sd">        Note 1: You need a valid EPC zipped dataset</span>
+
+<span class="sd">        :return: A data frame with all England EPC collected data.</span>
+<span class="sd">        :rtype: pandas.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">spenser_zip_file</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="c1"># Create a dataframe for every Household SPENSER file</span>
+        <span class="c1">## TIP: Household files finish with &quot;_OA11_2020.csv&quot;</span>
+        <span class="n">dfs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">spenser_zip_file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">spenser_zip_file</span><span class="o">.</span><span class="n">namelist</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_OA11_2020.csv&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="c1"># Return a unique SPENSER dataframe</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spenser.set_geo_lookups"><a class="viewcode-back" href="../data_prep.html#data_preparation.Spenser.set_geo_lookups">[docs]</a>    <span class="k">def</span> <span class="nf">set_geo_lookups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ladnm_lookup</span><span class="p">,</span> <span class="n">ladcd_lookup</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add geographic information using Output Area.</span>
+
+<span class="sd">        1. Rename &quot;Area&quot; to &quot;OA&quot;</span>
+<span class="sd">        2. Create a new column &quot;LADNM&quot; with the Local Authority name</span>
+<span class="sd">        3. Create a new column &quot;LADCD&quot; with the Local Authority code</span>
+
+<span class="sd">        :param ladnm_lookup: lookup from  Output Area to Local Authority name</span>
+<span class="sd">        :type ladnm_lookup: dict</span>
+<span class="sd">        :param ladcd_lookup: lookup from  Output Area to Local Authority code</span>
+<span class="sd">        :type ladcd_lookup: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s2">&quot;Area&quot;</span><span class="p">:</span> <span class="s2">&quot;OA&quot;</span><span class="p">},</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Local authority name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;LADNM&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;OA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">augment</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ladnm_lookup</span><span class="p">))</span>
+
+        <span class="c1"># Local authority code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;LADCD&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;OA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">augment</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ladcd_lookup</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Spenser.set_new_tenure"><a class="viewcode-back" href="../data_prep.html#data_preparation.Spenser.set_new_tenure">[docs]</a>    <span class="k">def</span> <span class="nf">set_new_tenure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new temporary tenure column</span>
+
+<span class="sd">        This method creates a new tenure column (following EPC values) where</span>
+<span class="sd">        the sub-categories</span>
+<span class="sd">        - &quot;Owned outright&quot;(=2)</span>
+<span class="sd">        - shared ownership&quot; (=3)</span>
+<span class="sd">        are merged into a general &quot;Owner-occupied&quot; (=1) category.</span>
+
+<span class="sd">        :param df: original SPENSER data frame</span>
+<span class="sd">        :type df: pandas.Dataframe</span>
+<span class="sd">        :return: SPENSER data frame with a new column</span>
+<span class="sd">        :rtype: pandas.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;tenure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;LC4402_C_TENHUK11&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;tenure&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;tenure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;tenure&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">),</span> <span class="s2">&quot;tenure&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="Spenser.step"><a class="viewcode-back" href="../data_prep.html#data_preparation.Spenser.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;SPENSER data preparation main step.</span>
+
+<span class="sd">        For each given local authority, this function return a processed SPENSER</span>
+<span class="sd">        dataset by:</span>
+
+<span class="sd">        1. Removing empty or non valid rows</span>
+<span class="sd">        2. Re-categorisation of tenure to match with EPC tenure</span>
+
+<span class="sd">        :param df: SPENSER DataFrame per Local Authority</span>
+<span class="sd">        :type df: pandas.DataFrame</span>
+<span class="sd">        :return: processed SPENSER data</span>
+<span class="sd">        :rtype: pandas.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Remove &quot;empty&quot; rows:</span>
+        <span class="c1"># - empty codes (here, negative values) are a problem for PSM method.</span>
+        <span class="c1"># TODO: store the &quot;empty&quot; rows in other variable to be possible append</span>
+        <span class="c1"># then at the end.</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">LC4402_C_TENHUK11</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">LC4402_C_TYPACCOM</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Create new tenure</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_new_tenure</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="c1"># Change selected columns to integer values</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;LC4402_C_TYPACCOM&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4402_C_TENHUK11&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4408_C_AHTHUK11&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4404_C_SIZHUK11&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4404_C_ROOMS&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4405EW_C_BEDROOMS&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4402_C_CENHEATHUK11&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4605_C_NSSEC&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4202_C_ETHHUK11&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LC4202_C_CARSNO&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tenure&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">df</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Patricia Ternes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>enriching_population &mdash; SHAPE 0.1.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SHAPE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dependencies.html">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">SHAPE API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SHAPE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">enriching_population</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for enriching_population</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">SHAPE: PSM step</span>
+<span class="sd">Created on Thursday August 25 2022</span>
+<span class="sd">@author: patricia-ternes</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">choices</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">from</span> <span class="nn">causalinference</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">NearestNeighbors</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">MaxNLocator</span>
+
+
+<div class="viewcode-block" id="EnrichingPopulation"><a class="viewcode-back" href="../enriching.html#enriching_population.EnrichingPopulation">[docs]</a><span class="k">class</span> <span class="nc">EnrichingPopulation</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to enrich a synthetic population.</span>
+
+<span class="sd">    To create a enriched synthetic population, this class combines two</span>
+<span class="sd">    pandas.DataFrames using the Propensity Score Matching approach.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise an EnrichingPopulation class.&quot;&quot;&quot;</span>
+        <span class="c1"># Configure PSM related parameters from &quot;config/config.yaml&quot;</span>
+        <span class="n">psm_yaml</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;config/config.yaml&quot;</span><span class="p">)</span>
+        <span class="n">parsed_psm</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">psm_yaml</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">=</span> <span class="n">parsed_psm</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;n_neighbors&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overlap_columns</span> <span class="o">=</span> <span class="n">parsed_psm</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;overlap_columns&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matches_columns</span> <span class="o">=</span> <span class="n">parsed_psm</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;matches_columns&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EnrichingPopulation.set_treatment"><a class="viewcode-back" href="../enriching.html#enriching_population.EnrichingPopulation.set_treatment">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">set_treatment</span><span class="p">(</span><span class="n">df0</span><span class="p">,</span> <span class="n">df1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a &quot;Treatment&quot; column in each dataframe.</span>
+
+<span class="sd">        :param df0: SPENSER dataset</span>
+<span class="sd">        :type df0: pandas.DataFrame</span>
+<span class="sd">        :param df1: EPC dataset</span>
+<span class="sd">        :type df1: pandas.DataFrame</span>
+<span class="sd">        :return: Two dataframes, first the SPENSER data + new column</span>
+<span class="sd">            (&quot;Treatment&quot; = 0), second the EPC data + new column (&quot;Treatment&quot; = 1)</span>
+<span class="sd">        :rtype: pandas.DataFrame, pandas.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">df0</span><span class="p">[</span><span class="s2">&quot;Treatment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">df1</span><span class="p">[</span><span class="s2">&quot;Treatment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">df0</span><span class="p">,</span> <span class="n">df1</span></div>
+
+<div class="viewcode-block" id="EnrichingPopulation.set_area_factor"><a class="viewcode-back" href="../enriching.html#enriching_population.EnrichingPopulation.set_area_factor">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">set_area_factor</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a new `Area_factor` column by factorizing the OA codes.</span>
+
+<span class="sd">        This step transform O</span>
+<span class="sd">        :param df: Dataset with a OA column.</span>
+<span class="sd">        :type df: pandas.DataFrame</span>
+<span class="sd">        :return: Input dataset + new factorized Area column</span>
+<span class="sd">        :rtype: pandas.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Area_factor</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">OA</span><span class="o">.</span><span class="n">factorize</span><span class="p">()</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Area_factor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Area_factor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="EnrichingPopulation.get_propensity_score"><a class="viewcode-back" href="../enriching.html#enriching_population.EnrichingPopulation.get_propensity_score">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_propensity_score</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">overlap_columns</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the propensity score values.</span>
+
+<span class="sd">        :param df: complete dataframe</span>
+<span class="sd">        :type df: pandas.DataFrame</span>
+<span class="sd">        :param overlap_columns: list of columns names that are present in both</span>
+<span class="sd">            datasets (EPC and SPENSER).</span>
+<span class="sd">        :type overlap_columns: list</span>
+<span class="sd">        :return: list of propensity score for all rows.</span>
+<span class="sd">        :rtype: numpy.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## Isolate the Y, X and the covariates</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Treatment&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># 1-Dimension outcome - arbitrary values</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Treatment&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># 1-Dimension treatment</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">overlap_columns</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># n-Dimension covariates</span>
+
+        <span class="c1"># Transform pandas dataframe into numpy.ndarray (CausalModel requisite)</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="c1"># Create the Causal Model</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+
+        <span class="c1"># Propensity score calculation</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">est_propensity_s</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">propensity</span><span class="p">[</span><span class="s2">&quot;fitted&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="EnrichingPopulation.get_neighbors"><a class="viewcode-back" href="../enriching.html#enriching_population.EnrichingPopulation.get_neighbors">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_neighbors</span><span class="p">(</span><span class="n">df1</span><span class="p">,</span> <span class="n">df2</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;For each SPENSER row get a list of EPC rows with the closest propensity score values.</span>
+
+<span class="sd">        :param df1: SPENSER dataset</span>
+<span class="sd">        :type df1: pandas.DataFrame</span>
+<span class="sd">        :param df2: EPC dataset</span>
+<span class="sd">        :type df2: pandas.DataFrame</span>
+<span class="sd">        :param n_neighbors: Number of neighbors.</span>
+<span class="sd">        :type n_neighbors: integer</span>
+<span class="sd">        :return: The propensity score difference and the indices of the closest neighbors.</span>
+<span class="sd">        :rtype: list, list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># create the neighbors object (p=2 means Euclidean distance)</span>
+        <span class="n">knn</span> <span class="o">=</span> <span class="n">NearestNeighbors</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="n">n_neighbors</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df2</span><span class="p">[[</span><span class="s2">&quot;ps&quot;</span><span class="p">]])</span>
+
+        <span class="c1"># for each household in df1 dataframe, find the nearest df2 neighbors</span>
+        <span class="n">distances</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">knn</span><span class="o">.</span><span class="n">kneighbors</span><span class="p">(</span><span class="n">df1</span><span class="p">[[</span><span class="s2">&quot;ps&quot;</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="n">distances</span><span class="p">,</span> <span class="n">indices</span></div>
+
+<div class="viewcode-block" id="EnrichingPopulation.get_matches"><a class="viewcode-back" href="../enriching.html#enriching_population.EnrichingPopulation.get_matches">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_matches</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;From the neighbors list get one match for each SPENSER row.</span>
+
+<span class="sd">        EPC rows with the same propensity score value have the same probability</span>
+<span class="sd">        of being matched with a SPENSER row. The greater the difference between</span>
+<span class="sd">        the propensity score values, the lower the probability of being drawn.</span>
+<span class="sd">        The weight function used, is a step function.</span>
+
+<span class="sd">        :param distances: List of propensity score difference between the closest neighbors.</span>
+<span class="sd">        :type distances: list</span>
+<span class="sd">        :param indices: List of the closest neighbors indices.</span>
+<span class="sd">        :type indices: list</span>
+<span class="sd">        :param n_neighbors: Number of neighbors.</span>
+<span class="sd">        :type n_neighbors: integer</span>
+<span class="sd">        :return: List of assigned pairs.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">index1</span><span class="p">,</span> <span class="n">candidates2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">indices</span><span class="p">):</span>
+            <span class="n">is_zero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">distances</span><span class="p">[</span><span class="n">index1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">is_zero</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">n_neighbors</span><span class="p">:</span>
+                <span class="n">weight</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">-</span> <span class="p">(</span><span class="n">distances</span><span class="p">[</span><span class="n">index1</span><span class="p">]</span> <span class="o">/</span> <span class="n">distances</span><span class="p">[</span><span class="n">index1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">95</span><span class="p">)</span>
+                <span class="n">index2</span> <span class="o">=</span> <span class="n">choices</span><span class="p">(</span><span class="n">candidates2</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weight</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index2</span> <span class="o">=</span> <span class="n">choices</span><span class="p">(</span><span class="n">candidates2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">pairs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index1</span><span class="p">,</span> <span class="n">index2</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">pairs</span></div>
+
+<div class="viewcode-block" id="EnrichingPopulation.get_enriched_pop"><a class="viewcode-back" href="../enriching.html#enriching_population.EnrichingPopulation.get_enriched_pop">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_enriched_pop</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="n">df1</span><span class="p">,</span> <span class="n">df2</span><span class="p">,</span> <span class="n">matches_columns</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the SPENSER enriched population.</span>
+
+<span class="sd">        Combine the EPC data with the SPENSER data to generated a enriched</span>
+<span class="sd">        synthetic population. To combine the datasets, the propensity score</span>
+<span class="sd">        matching method is used.</span>
+
+<span class="sd">        :param pairs: List of assigned pairs.</span>
+<span class="sd">        :type pairs: list</span>
+<span class="sd">        :param df1: SPENSER dataset.</span>
+<span class="sd">        :type df1: pandas.DataFrame</span>
+<span class="sd">        :param df2: EPC dataset.</span>
+<span class="sd">        :type df2: pandas.DataFrame</span>
+<span class="sd">        :param matches_columns: List of columns name from EPC to be incorporated</span>
+<span class="sd">            into SPENSER dataset.</span>
+<span class="sd">        :type matches_columns: list</span>
+<span class="sd">        :return: The enriched synthetic population</span>
+<span class="sd">        :rtype: pandas.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Add matched df2 index id in df1 dataframe</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
+        <span class="n">df1</span><span class="p">[</span><span class="s2">&quot;EPCid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">drop_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;tenure&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ps&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Treatment&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Area_factor&quot;</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">matches_columns</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">df1</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">df2</span> <span class="o">=</span> <span class="n">df2</span><span class="p">[</span><span class="n">matches_columns</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df2</span><span class="p">[</span><span class="s2">&quot;EPCid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df2</span><span class="o">.</span><span class="n">index</span>
+
+        <span class="n">df1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df1</span><span class="p">,</span> <span class="n">df2</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;EPCid&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+        <span class="n">df1</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;EPCid&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df1</span></div>
+
+<div class="viewcode-block" id="EnrichingPopulation.save_csv_files"><a class="viewcode-back" href="../enriching.html#enriching_population.EnrichingPopulation.save_csv_files">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">save_csv_files</span><span class="p">(</span><span class="n">list_df_names</span><span class="p">,</span> <span class="n">list_df</span><span class="p">,</span> <span class="n">zip_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save pandas.DataFrames as `.csv` files compressed in a `.zip` file.</span>
+
+<span class="sd">        Save the dataset into a zip file.</span>
+<span class="sd">        Each local authority is stored in a different csv file.</span>
+
+<span class="sd">        :param list_df_names: Names of each csv file.</span>
+<span class="sd">        :type list_df_names: list</span>
+<span class="sd">        :param list_df: List of pandas.DataFrames.</span>
+<span class="sd">        :type list_df: list</span>
+<span class="sd">        :param zip_name: Desired name to store the zipped .csv files</span>
+<span class="sd">        :type zip_name: string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">save_dir</span> <span class="o">=</span> <span class="s2">&quot;data/output/&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">save_dir</span><span class="p">)):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_dir</span><span class="p">)</span>
+
+        <span class="c1"># save final population</span>
+        <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="n">zip_name</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csv_zip</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_df_names</span><span class="p">)):</span>
+                <span class="n">csv_zip</span><span class="o">.</span><span class="n">writestr</span><span class="p">(</span>
+                    <span class="n">list_df_names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">list_df</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EnrichingPopulation.save_validation_fig"><a class="viewcode-back" href="../enriching.html#enriching_population.EnrichingPopulation.save_validation_fig">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">save_validation_fig</span><span class="p">(</span><span class="n">SHAPE</span><span class="p">,</span> <span class="n">EPC</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the internal validation image.</span>
+
+<span class="sd">        Floor Area distribution and Accommodation age codes distribution</span>
+<span class="sd">        comparison between original EPC data and SHAPE population.</span>
+
+<span class="sd">        :param df1: SHAPE dataset list.</span>
+<span class="sd">        :type df1: list of pandas.DataFrame</span>
+<span class="sd">        :param df2: EPC dataset list.</span>
+<span class="sd">        :type df2: list of pandas.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bins1</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="p">]</span>
+
+        <span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ACCOM_AGE&quot;</span><span class="p">,</span> <span class="s2">&quot;FLOOR_AREA&quot;</span><span class="p">,</span> <span class="s2">&quot;GAS&quot;</span><span class="p">]</span>
+        <span class="n">xlabels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Accommodation age&quot;</span><span class="p">,</span> <span class="s2">&quot;Floor area&quot;</span><span class="p">,</span> <span class="s2">&quot;Gas Availability&quot;</span><span class="p">]</span>
+
+        <span class="n">colours</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">color_palette</span><span class="p">()</span>
+
+        <span class="n">save_dir</span> <span class="o">=</span> <span class="s2">&quot;data/output/&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">save_dir</span><span class="p">)):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_dir</span><span class="p">)</span>
+
+        <span class="n">zip_png_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="s2">&quot;SHAPE_distribution-images.zip&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">zip_png_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">png_zip</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">SHAPE</span><span class="p">)):</span>
+                <span class="n">df1</span> <span class="o">=</span> <span class="n">EPC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">df2</span> <span class="o">=</span> <span class="n">SHAPE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+                <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">color_codes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">constraints</span><span class="p">:</span>
+
+                    <span class="n">y_epc</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">df1</span><span class="p">[</span><span class="n">constraint</span><span class="p">]</span>
+                        <span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="n">bins1</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+                    <span class="p">)</span>
+                    <span class="n">y_msm</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">df2</span><span class="p">[</span><span class="n">constraint</span><span class="p">]</span>
+                        <span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="n">bins1</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+                    <span class="p">)</span>
+
+                    <span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">bins1</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">:],</span> <span class="n">y</span><span class="o">=</span><span class="n">y_epc</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">bins1</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">:],</span> <span class="n">y</span><span class="o">=</span><span class="n">y_msm</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colours</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+                        <span class="n">ax</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabels</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                        <span class="n">ax</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Frequency&quot;</span><span class="p">)</span>
+
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+
+                <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;EPC&quot;</span><span class="p">)</span>
+                <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;SHAPE&quot;</span><span class="p">)</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="n">pad</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+                <span class="n">lad_name</span> <span class="o">=</span> <span class="n">df2</span><span class="o">.</span><span class="n">LADNM</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">lad_code</span> <span class="o">=</span> <span class="n">df2</span><span class="o">.</span><span class="n">LADCD</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">fig_name</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">lad_code</span><span class="p">,</span> <span class="n">lad_name</span><span class="p">,</span> <span class="s2">&quot;distribution.png&quot;</span><span class="p">])</span>
+                <span class="n">png_zip</span><span class="o">.</span><span class="n">writestr</span><span class="p">(</span><span class="n">fig_name</span><span class="p">,</span> <span class="n">buf</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="EnrichingPopulation.step"><a class="viewcode-back" href="../enriching.html#enriching_population.EnrichingPopulation.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df0</span><span class="p">,</span> <span class="n">df1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Enriching population main step.</span>
+
+<span class="sd">        In this step the EPC data and the SPENSER data are combined to generate</span>
+<span class="sd">        an enriched synthetic population for a given local authority.</span>
+
+<span class="sd">        :param df0: SPENSER dataset.</span>
+<span class="sd">        :type df0: pandas.DataFrame</span>
+<span class="sd">        :param df1: EPC dataset.</span>
+<span class="sd">        :type df1: pandas.DataFrame</span>
+<span class="sd">        :param lad_code: Local authority district code.</span>
+<span class="sd">        :type lad_code: string</span>
+<span class="sd">        :param psm_fig: Boolean to save the propensity score distribution image, defaults to True.</span>
+<span class="sd">        :type psm_fig: bool, optional</span>
+<span class="sd">        :param validation_fig: Boolean to save the internal validation image, defaults to True.</span>
+<span class="sd">        :type validation_fig: bool, optional</span>
+<span class="sd">        :return: Enriched synthetic population</span>
+<span class="sd">        :rtype: pandas.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df0</span><span class="p">,</span> <span class="n">df1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_treatment</span><span class="p">(</span><span class="n">df0</span><span class="p">,</span> <span class="n">df1</span><span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df0</span><span class="p">,</span> <span class="n">df1</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_area_factor</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;ps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_propensity_score</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overlap_columns</span><span class="p">)</span>
+
+        <span class="c1"># Separating EPC data from MSM data</span>
+        <span class="n">df0</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">dataset</span><span class="o">.</span><span class="n">Treatment</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df1</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">dataset</span><span class="o">.</span><span class="n">Treatment</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">dataset</span>
+
+        <span class="c1"># Get neighbors and matched pairs</span>
+        <span class="n">distances</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_neighbors</span><span class="p">(</span><span class="n">df0</span><span class="p">,</span> <span class="n">df1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span><span class="p">)</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_matches</span><span class="p">(</span><span class="n">distances</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">distances</span><span class="p">,</span> <span class="n">indices</span>
+
+        <span class="c1"># Get enriched population</span>
+        <span class="n">rich_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_enriched_pop</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="n">df0</span><span class="p">,</span> <span class="n">df1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">matches_columns</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">rich_df</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Patricia Ternes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

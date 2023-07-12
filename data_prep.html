@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Preparation Module &mdash; SHAPE 0.1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Enriching Population Module" href="enriching.html" />
+    <link rel="prev" title="SHAPE API Reference" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SHAPE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="dependencies.html">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">SHAPE API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Data Preparation Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data_preparation.Epc"><code class="docutils literal notranslate"><span class="pre">Epc</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#data_preparation.Epc.get_epc_dataframe"><code class="docutils literal notranslate"><span class="pre">Epc.get_epc_dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data_preparation.Epc.remove_duplicates"><code class="docutils literal notranslate"><span class="pre">Epc.remove_duplicates()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data_preparation.Epc.set_categorical_code"><code class="docutils literal notranslate"><span class="pre">Epc.set_categorical_code()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data_preparation.Epc.set_geo_lookups"><code class="docutils literal notranslate"><span class="pre">Epc.set_geo_lookups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data_preparation.Epc.set_lookups"><code class="docutils literal notranslate"><span class="pre">Epc.set_lookups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data_preparation.Epc.set_numerical_code"><code class="docutils literal notranslate"><span class="pre">Epc.set_numerical_code()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data_preparation.Epc.step"><code class="docutils literal notranslate"><span class="pre">Epc.step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#data_preparation.Spenser"><code class="docutils literal notranslate"><span class="pre">Spenser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#data_preparation.Spenser.get_spenser_dataframe"><code class="docutils literal notranslate"><span class="pre">Spenser.get_spenser_dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data_preparation.Spenser.set_geo_lookups"><code class="docutils literal notranslate"><span class="pre">Spenser.set_geo_lookups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data_preparation.Spenser.set_new_tenure"><code class="docutils literal notranslate"><span class="pre">Spenser.set_new_tenure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data_preparation.Spenser.step"><code class="docutils literal notranslate"><span class="pre">Spenser.step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#data_preparation.augment"><code class="docutils literal notranslate"><span class="pre">augment()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data_preparation.geo_lookup"><code class="docutils literal notranslate"><span class="pre">geo_lookup()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="enriching.html">Enriching Population Module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SHAPE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">SHAPE API Reference</a></li>
+      <li class="breadcrumb-item active">Data Preparation Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/data_prep.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-data_preparation">
+<span id="data-preparation-module"></span><h1>Data Preparation Module<a class="headerlink" href="#module-data_preparation" title="Permalink to this heading"></a></h1>
+<p>SHAPE: data wrangling
+Created on Thursday August 25 2022
+&#64;author: patricia-ternes</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="data_preparation.Epc">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">data_preparation.</span></span><span class="sig-name descname"><span class="pre">Epc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oacd_lookup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ladnm_lookup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ladcd_lookup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_preparation.html#Epc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.Epc" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to represent the EPC data and related parameters/methods.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="data_preparation.Epc.get_epc_dataframe">
+<span class="sig-name descname"><span class="pre">get_epc_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/data_preparation.html#Epc.get_epc_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.Epc.get_epc_dataframe" title="Permalink to this definition"></a></dt>
+<dd><p>Get EPC data for all available England Local Authorities.</p>
+<p>Note 1: You need a valid EPC zipped dataset.</p>
+<p>Note 2: The code was organized for the following .zip tree:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">all-domestic-certificates.zip</span>
+<span class="pre">|__</span> <span class="pre">LICENCE.txt</span>
+<span class="pre">|__</span> <span class="pre">domestic-XYYYYYYYY-LADname</span>
+<span class="pre">|</span>&#160;&#160; <span class="pre">|__</span> <span class="pre">recommendations.csv</span>
+<span class="pre">|</span>&#160;&#160; <span class="pre">|__</span> <span class="pre">certificates.csv</span>
+<span class="pre">|__</span> <span class="pre">domestic-XYYYYYYYY-LADname</span>
+<span class="pre">|</span>&#160;&#160;&#160; <span class="pre">|__</span> <span class="pre">recommendations.csv</span>
+<span class="pre">|</span>&#160;&#160;&#160; <span class="pre">|__</span> <span class="pre">certificates.csv</span>
+<span class="pre">.</span>
+<span class="pre">.</span>
+<span class="pre">.</span>
+<span class="pre">`</span></code>
+:return: A data frame with all England EPC collected data.
+:rtype: pandas.DataFrame</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data_preparation.Epc.remove_duplicates">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">remove_duplicates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/data_preparation.html#Epc.remove_duplicates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.Epc.remove_duplicates" title="Permalink to this definition"></a></dt>
+<dd><p>Remove EPC Duplicate Certificates</p>
+<p>When using the EPC datasets we need to be careful with duplicate EPCs
+for the same property. While not an enormous issue as an EPC is valid
+for up to 10 years unless the property is renovated or retrofitted,
+there may be multiple records especially for rental properties which are
+improved to meet recent regulations.</p>
+<p>This function removing duplicates with the same BUILDING REFERENCE
+NUMBER by selecting the most recent record and discarding others.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – Raw EPC dataset.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>EPC dataset without duplicate Certificates.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data_preparation.Epc.set_categorical_code">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_categorical_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_preparation.html#Epc.set_categorical_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.Epc.set_categorical_code" title="Permalink to this definition"></a></dt>
+<dd><p>Apply the lookup to a categorical column.</p>
+<p>Transform the values in a dataframe column using a lookup dictionary.
+This method is valid when the column values are categorical.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The input dataframe.</p></li>
+<li><p><strong>df_col</strong> (<em>string</em>) – The column in df that represents the categorical values.</p></li>
+<li><p><strong>lookup</strong> (<em>dict</em>) – A dictionary from categorical values to categorical codes.</p></li>
+<li><p><strong>rename</strong> (<em>bool</em><em>, </em><em>optional</em>) – The new column name after transformation (if false, keep
+the current name), defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns the data with the updated column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data_preparation.Epc.set_geo_lookups">
+<span class="sig-name descname"><span class="pre">set_geo_lookups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oacd_lookup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ladnm_lookup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ladcd_lookup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_preparation.html#Epc.set_geo_lookups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.Epc.set_geo_lookups" title="Permalink to this definition"></a></dt>
+<dd><p>Add geographic information using postcode.</p>
+<ol class="arabic simple">
+<li><p>Transform the postcode column into Output Area (new column name: “OA”)</p></li>
+<li><p>Create a new column “LADNM” with the Local Authority name</p></li>
+<li><p>Create a new column “LADCD” with the Local Authority code</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>oacd_lookup</strong> (<em>dict</em>) – lookup from postcode to Output Area</p></li>
+<li><p><strong>ladnm_lookup</strong> (<em>dict</em>) – lookup from  Output Area to Local Authority name</p></li>
+<li><p><strong>ladcd_lookup</strong> (<em>dict</em>) – lookup from  Output Area to Local Authority code</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data_preparation.Epc.set_lookups">
+<span class="sig-name descname"><span class="pre">set_lookups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_preparation.html#Epc.set_lookups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.Epc.set_lookups" title="Permalink to this definition"></a></dt>
+<dd><p>Update columns using the lookups dictionaries.</p>
+<p>Update the information related with <cite>area</cite>, <cite>tenure</cite>, <cite>accommodation
+type</cite>, <cite>construction age band</cite>, <cite>main gas flag</cite>, and <cite>floor area</cite>,
+by using the lookup variables (<cite>accommodation_lookup</cite>,
+<cite>age_categorical_lookup</cite>, <cite>age_numerical_lookup</cite>, <cite>floor_area_lookup</cite>,
+<cite>gas_lookup</cite>, <cite>tenure_lookup</cite>, <cite>area_lookup</cite>) and the
+<cite>set_categorical_code</cite> and <cite>set_numerical_code</cite> functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.Dataframe</em>) – Dataframe with EPC information.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data_preparation.Epc.set_numerical_code">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_numerical_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_preparation.html#Epc.set_numerical_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.Epc.set_numerical_code" title="Permalink to this definition"></a></dt>
+<dd><p>Apply the lookup to a numerical column</p>
+<p>Transform the values in a dataframe column using a lookup dictionary.
+This method is valid when the column values are numerical, following
+the rule:</p>
+<p>if (j &lt; value &lt;= k), then, (value = i).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The input dataframe.</p></li>
+<li><p><strong>df_col</strong> (<em>string</em>) – The column in df that represents the numerical values.</p></li>
+<li><p><strong>lookup</strong> (<em>dict</em>) – A dictionary from numerical values to numerical codes;
+The dictionary structure is [[i1, j1, k1], [i2, j2, k2], …,
+[iN, jN, kN]], where: iN is the desired code for band N, jN is the
+minimum value of the band N (not included), kN is the maximum value
+of the band N (included), and N is the number of bands.</p></li>
+<li><p><strong>rename</strong> (<em>bool</em><em>, </em><em>optional</em>) – The new column name after transformation (if false, keep
+the current name), defaults to False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data_preparation.Epc.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/data_preparation.html#Epc.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.Epc.step" title="Permalink to this definition"></a></dt>
+<dd><p>EPC data preparation main step.</p>
+<p>This function return a processed EPC dataset by:</p>
+<ol class="arabic simple">
+<li><p>Removing EPC Duplicate Certificates</p></li>
+<li><p>Performing variables re-categorisation</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – EPC DataFrame per Local Authority</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>processed EPC data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="data_preparation.Spenser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">data_preparation.</span></span><span class="sig-name descname"><span class="pre">Spenser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ladnm_lookup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ladcd_lookup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_preparation.html#Spenser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.Spenser" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to represent the SPENSER data and related parameters/methods.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="data_preparation.Spenser.get_spenser_dataframe">
+<span class="sig-name descname"><span class="pre">get_spenser_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/data_preparation.html#Spenser.get_spenser_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.Spenser.get_spenser_dataframe" title="Permalink to this definition"></a></dt>
+<dd><p>Get EPC data for all available local authorities.</p>
+<p>Note 1: You need a valid EPC zipped dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A data frame with all England EPC collected data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data_preparation.Spenser.set_geo_lookups">
+<span class="sig-name descname"><span class="pre">set_geo_lookups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ladnm_lookup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ladcd_lookup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_preparation.html#Spenser.set_geo_lookups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.Spenser.set_geo_lookups" title="Permalink to this definition"></a></dt>
+<dd><p>Add geographic information using Output Area.</p>
+<ol class="arabic simple">
+<li><p>Rename “Area” to “OA”</p></li>
+<li><p>Create a new column “LADNM” with the Local Authority name</p></li>
+<li><p>Create a new column “LADCD” with the Local Authority code</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ladnm_lookup</strong> (<em>dict</em>) – lookup from  Output Area to Local Authority name</p></li>
+<li><p><strong>ladcd_lookup</strong> (<em>dict</em>) – lookup from  Output Area to Local Authority code</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data_preparation.Spenser.set_new_tenure">
+<span class="sig-name descname"><span class="pre">set_new_tenure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/data_preparation.html#Spenser.set_new_tenure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.Spenser.set_new_tenure" title="Permalink to this definition"></a></dt>
+<dd><p>Create new temporary tenure column</p>
+<p>This method creates a new tenure column (following EPC values) where
+the sub-categories
+- “Owned outright”(=2)
+- shared ownership” (=3)
+are merged into a general “Owner-occupied” (=1) category.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.Dataframe</em>) – original SPENSER data frame</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SPENSER data frame with a new column</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="data_preparation.Spenser.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/data_preparation.html#Spenser.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.Spenser.step" title="Permalink to this definition"></a></dt>
+<dd><p>SPENSER data preparation main step.</p>
+<p>For each given local authority, this function return a processed SPENSER
+dataset by:</p>
+<ol class="arabic simple">
+<li><p>Removing empty or non valid rows</p></li>
+<li><p>Re-categorisation of tenure to match with EPC tenure</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – SPENSER DataFrame per Local Authority</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>processed SPENSER data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data_preparation.augment">
+<span class="sig-prename descclassname"><span class="pre">data_preparation.</span></span><span class="sig-name descname"><span class="pre">augment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_preparation.html#augment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.augment" title="Permalink to this definition"></a></dt>
+<dd><p>Simple dictionary translate function to use with lambda function.</p>
+<p>Return a value for a given key.
+If the key is not listed in the dictionary, the function will return <cite>None</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>Any</em>) – dictionary key</p></li>
+<li><p><strong>lookup</strong> (<em>dict</em>) – dictionary</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionary value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any or empty</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data_preparation.geo_lookup">
+<span class="sig-prename descclassname"><span class="pre">data_preparation.</span></span><span class="sig-name descname"><span class="pre">geo_lookup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_preparation.html#geo_lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_preparation.geo_lookup" title="Permalink to this definition"></a></dt>
+<dd><p>Return geographic lookup dicts and local authority list.</p>
+<p>Three lookup dictionaries are generated:
+- From Postcodes to Output Areas (oacd_lookup).
+- From Output Areas to Local Authority names (ladnm_lookup).
+- From Output Areas to Local Authority codes (ladcd_lookup).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>local authority list, oacd_lookup, ladnm_lookup, ladcd_lookup</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list, dict, dict, dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="SHAPE API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="enriching.html" class="btn btn-neutral float-right" title="Enriching Population Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Patricia Ternes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enriching Population Module &mdash; SHAPE 0.1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Data Preparation Module" href="data_prep.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SHAPE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="dependencies.html">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">SHAPE API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="data_prep.html">Data Preparation Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Enriching Population Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#enriching_population.EnrichingPopulation"><code class="docutils literal notranslate"><span class="pre">EnrichingPopulation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#enriching_population.EnrichingPopulation.get_enriched_pop"><code class="docutils literal notranslate"><span class="pre">EnrichingPopulation.get_enriched_pop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#enriching_population.EnrichingPopulation.get_matches"><code class="docutils literal notranslate"><span class="pre">EnrichingPopulation.get_matches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#enriching_population.EnrichingPopulation.get_neighbors"><code class="docutils literal notranslate"><span class="pre">EnrichingPopulation.get_neighbors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#enriching_population.EnrichingPopulation.get_propensity_score"><code class="docutils literal notranslate"><span class="pre">EnrichingPopulation.get_propensity_score()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#enriching_population.EnrichingPopulation.save_csv_files"><code class="docutils literal notranslate"><span class="pre">EnrichingPopulation.save_csv_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#enriching_population.EnrichingPopulation.save_validation_fig"><code class="docutils literal notranslate"><span class="pre">EnrichingPopulation.save_validation_fig()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#enriching_population.EnrichingPopulation.set_area_factor"><code class="docutils literal notranslate"><span class="pre">EnrichingPopulation.set_area_factor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#enriching_population.EnrichingPopulation.set_treatment"><code class="docutils literal notranslate"><span class="pre">EnrichingPopulation.set_treatment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#enriching_population.EnrichingPopulation.step"><code class="docutils literal notranslate"><span class="pre">EnrichingPopulation.step()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SHAPE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">SHAPE API Reference</a></li>
+      <li class="breadcrumb-item active">Enriching Population Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/enriching.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-enriching_population">
+<span id="enriching-population-module"></span><h1>Enriching Population Module<a class="headerlink" href="#module-enriching_population" title="Permalink to this heading"></a></h1>
+<p>SHAPE: PSM step
+Created on Thursday August 25 2022
+&#64;author: patricia-ternes</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="enriching_population.EnrichingPopulation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">enriching_population.</span></span><span class="sig-name descname"><span class="pre">EnrichingPopulation</span></span><a class="reference internal" href="_modules/enriching_population.html#EnrichingPopulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#enriching_population.EnrichingPopulation" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to enrich a synthetic population.</p>
+<p>To create a enriched synthetic population, this class combines two
+pandas.DataFrames using the Propensity Score Matching approach.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="enriching_population.EnrichingPopulation.get_enriched_pop">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_enriched_pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matches_columns</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/enriching_population.html#EnrichingPopulation.get_enriched_pop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#enriching_population.EnrichingPopulation.get_enriched_pop" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the SPENSER enriched population.</p>
+<p>Combine the EPC data with the SPENSER data to generated a enriched
+synthetic population. To combine the datasets, the propensity score
+matching method is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pairs</strong> (<em>list</em>) – List of assigned pairs.</p></li>
+<li><p><strong>df1</strong> (<em>pandas.DataFrame</em>) – SPENSER dataset.</p></li>
+<li><p><strong>df2</strong> (<em>pandas.DataFrame</em>) – EPC dataset.</p></li>
+<li><p><strong>matches_columns</strong> (<em>list</em>) – List of columns name from EPC to be incorporated
+into SPENSER dataset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The enriched synthetic population</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="enriching_population.EnrichingPopulation.get_matches">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/enriching_population.html#EnrichingPopulation.get_matches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#enriching_population.EnrichingPopulation.get_matches" title="Permalink to this definition"></a></dt>
+<dd><p>From the neighbors list get one match for each SPENSER row.</p>
+<p>EPC rows with the same propensity score value have the same probability
+of being matched with a SPENSER row. The greater the difference between
+the propensity score values, the lower the probability of being drawn.
+The weight function used, is a step function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distances</strong> (<em>list</em>) – List of propensity score difference between the closest neighbors.</p></li>
+<li><p><strong>indices</strong> (<em>list</em>) – List of the closest neighbors indices.</p></li>
+<li><p><strong>n_neighbors</strong> (<em>integer</em>) – Number of neighbors.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of assigned pairs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="enriching_population.EnrichingPopulation.get_neighbors">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_neighbors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/enriching_population.html#EnrichingPopulation.get_neighbors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#enriching_population.EnrichingPopulation.get_neighbors" title="Permalink to this definition"></a></dt>
+<dd><p>For each SPENSER row get a list of EPC rows with the closest propensity score values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df1</strong> (<em>pandas.DataFrame</em>) – SPENSER dataset</p></li>
+<li><p><strong>df2</strong> (<em>pandas.DataFrame</em>) – EPC dataset</p></li>
+<li><p><strong>n_neighbors</strong> (<em>integer</em>) – Number of neighbors.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The propensity score difference and the indices of the closest neighbors.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list, list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="enriching_population.EnrichingPopulation.get_propensity_score">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_propensity_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap_columns</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/enriching_population.html#EnrichingPopulation.get_propensity_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#enriching_population.EnrichingPopulation.get_propensity_score" title="Permalink to this definition"></a></dt>
+<dd><p>Return the propensity score values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – complete dataframe</p></li>
+<li><p><strong>overlap_columns</strong> (<em>list</em>) – list of columns names that are present in both
+datasets (EPC and SPENSER).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of propensity score for all rows.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="enriching_population.EnrichingPopulation.save_csv_files">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_csv_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_df_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zip_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/enriching_population.html#EnrichingPopulation.save_csv_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#enriching_population.EnrichingPopulation.save_csv_files" title="Permalink to this definition"></a></dt>
+<dd><p>Save pandas.DataFrames as <cite>.csv</cite> files compressed in a <cite>.zip</cite> file.</p>
+<p>Save the dataset into a zip file.
+Each local authority is stored in a different csv file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list_df_names</strong> (<em>list</em>) – Names of each csv file.</p></li>
+<li><p><strong>list_df</strong> (<em>list</em>) – List of pandas.DataFrames.</p></li>
+<li><p><strong>zip_name</strong> (<em>string</em>) – Desired name to store the zipped .csv files</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="enriching_population.EnrichingPopulation.save_validation_fig">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_validation_fig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">SHAPE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPC</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/enriching_population.html#EnrichingPopulation.save_validation_fig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#enriching_population.EnrichingPopulation.save_validation_fig" title="Permalink to this definition"></a></dt>
+<dd><p>Save the internal validation image.</p>
+<p>Floor Area distribution and Accommodation age codes distribution
+comparison between original EPC data and SHAPE population.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df1</strong> (<em>list</em><em> of </em><em>pandas.DataFrame</em>) – SHAPE dataset list.</p></li>
+<li><p><strong>df2</strong> (<em>list</em><em> of </em><em>pandas.DataFrame</em>) – EPC dataset list.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="enriching_population.EnrichingPopulation.set_area_factor">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_area_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/enriching_population.html#EnrichingPopulation.set_area_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#enriching_population.EnrichingPopulation.set_area_factor" title="Permalink to this definition"></a></dt>
+<dd><p>Add a new <cite>Area_factor</cite> column by factorizing the OA codes.</p>
+<p>This step transform O
+:param df: Dataset with a OA column.
+:type df: pandas.DataFrame
+:return: Input dataset + new factorized Area column
+:rtype: pandas.DataFrame</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="enriching_population.EnrichingPopulation.set_treatment">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_treatment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/enriching_population.html#EnrichingPopulation.set_treatment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#enriching_population.EnrichingPopulation.set_treatment" title="Permalink to this definition"></a></dt>
+<dd><p>Create a “Treatment” column in each dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df0</strong> (<em>pandas.DataFrame</em>) – SPENSER dataset</p></li>
+<li><p><strong>df1</strong> (<em>pandas.DataFrame</em>) – EPC dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Two dataframes, first the SPENSER data + new column
+(“Treatment” = 0), second the EPC data + new column (“Treatment” = 1)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame, pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="enriching_population.EnrichingPopulation.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/enriching_population.html#EnrichingPopulation.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#enriching_population.EnrichingPopulation.step" title="Permalink to this definition"></a></dt>
+<dd><p>Enriching population main step.</p>
+<p>In this step the EPC data and the SPENSER data are combined to generate
+an enriched synthetic population for a given local authority.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df0</strong> (<em>pandas.DataFrame</em>) – SPENSER dataset.</p></li>
+<li><p><strong>df1</strong> (<em>pandas.DataFrame</em>) – EPC dataset.</p></li>
+<li><p><strong>lad_code</strong> (<em>string</em>) – Local authority district code.</p></li>
+<li><p><strong>psm_fig</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to save the propensity score distribution image, defaults to True.</p></li>
+<li><p><strong>validation_fig</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to save the internal validation image, defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Enriched synthetic population</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="data_prep.html" class="btn btn-neutral float-left" title="Data Preparation Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Patricia Ternes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
