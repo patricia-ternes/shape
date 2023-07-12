@@ -1,5 +1,5 @@
-from activity_model import __version__
-from activity_model.data_preparation import Epc
+from shape import __version__
+from shape.data_preparation import Epc
 
 import requests
 import pytest
