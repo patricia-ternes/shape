@@ -1,7 +1,6 @@
 numpy
 pyyaml
 pandas
-zipfile
 causalinference
 scikit-learn
 seaborn
